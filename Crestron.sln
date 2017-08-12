@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrestronConnection", "CrestronConnection\CrestronConnection.csproj", "{D6C573E8-DC1D-44DA-B6CB-AC6ECE5EFE21}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenerateCrestronModule", "GenerateCrestronModule\GenerateCrestronModule.csproj", "{F2AEF25D-D64F-49A4-A6EF-EB6141BCC6FE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D6C573E8-DC1D-44DA-B6CB-AC6ECE5EFE21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6C573E8-DC1D-44DA-B6CB-AC6ECE5EFE21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6C573E8-DC1D-44DA-B6CB-AC6ECE5EFE21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6C573E8-DC1D-44DA-B6CB-AC6ECE5EFE21}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2AEF25D-D64F-49A4-A6EF-EB6141BCC6FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2AEF25D-D64F-49A4-A6EF-EB6141BCC6FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2AEF25D-D64F-49A4-A6EF-EB6141BCC6FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2AEF25D-D64F-49A4-A6EF-EB6141BCC6FE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
