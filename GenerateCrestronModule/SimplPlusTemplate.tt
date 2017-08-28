@@ -125,6 +125,10 @@ SOCKETSTATUS tcpServer
     connectionStatus = iStatus;
 }
 
+FUNCTION ProcessInput(STRING line)
+{
+}
+
 SOCKETRECEIVE tcpServer
 {
     STRING rx[1024];
@@ -213,8 +217,4 @@ CHANGE <#= name #>_FB
 <#
 }
 #>
-
-FUNCTION ProcessInput(STRING line)
-{
-}
 
