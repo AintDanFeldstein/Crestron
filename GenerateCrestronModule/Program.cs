@@ -8,9 +8,9 @@ using System.Net;
 
 namespace GenerateCrestronModule
 {
-    class Foo : CrestronConnection
+    class MyHomeCrestron : CrestronConnection
     {
-        public Foo() : base(IPAddress.Parse("0.0.0.0"), 0)
+        public MyHomeCrestron() : base(IPAddress.Parse("0.0.0.0"), 0)
         {
         }
 
@@ -23,8 +23,7 @@ namespace GenerateCrestronModule
             }
             set
             {
-                this.bool1 = value;
-                OnPropertyChanged("Bool1");
+                SetProperty(ref this.bool1, value, "bool1");
             }
         }
 
@@ -37,8 +36,7 @@ namespace GenerateCrestronModule
             }
             set
             {
-                this.string1 = value;
-                OnPropertyChanged("String1");
+                SetProperty(ref this.string1, value, "string1");
             }
         }
 
@@ -51,8 +49,7 @@ namespace GenerateCrestronModule
             }
             set
             {
-                this.uint1 = value;
-                OnPropertyChanged("UInt1");
+                SetProperty(ref this.uint1, value, "uint1");
             }
         }
 
@@ -62,11 +59,14 @@ namespace GenerateCrestronModule
     {
         static void Main(string[] args)
         {
-            Foo foo = new Foo();
+            MyHomeCrestron myHomeCrestron = new MyHomeCrestron();
 
-            foo.Bool1 = true;
-            foo.String1 = "foobar";
-            foo.UInt1 = 75;
+            myHomeCrestron.Bool1 = true;
+            myHomeCrestron.String1 = "foobar";
+            myHomeCrestron.UInt1 = 75;
+            SimplPlusTemplate template = new SimplPlusTemplate(myHomeCrestron);
+            String result = template.TransformText();
+            System.IO.File.WriteAllText("c:\\tmp\\foo.xxx", result);
         }
     }
 }

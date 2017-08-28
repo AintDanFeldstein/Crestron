@@ -1,0 +1,220 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="Crestron" #>
+
+#DEFINE_CONSTANT STATUS_NOT_CONNECTED 0
+#DEFINE_CONSTANT STATUS_CONNECTED 2
+#DEFINE_CONSTANT STATUS_REMOTE_DISCONNECT 4
+#DEFINE_CONSTANT ERROR_NONE 0
+#DEFINE_CONSTANT ERROR_TX_NOT_CONNECTED 1
+#DEFINE_CONSTANT ERROR_BAD_TCP_SERVER 2
+#DEFINE_CONSTANT ERROR_BAD_PORT 3
+
+
+  // Need these _SKIP_'s so that INPUT/OUTPUT's don't overlap PARAMETERS in the SIMPL Windows Detail View
+DIGITAL_INPUT _SKIP_;      DIGITAL_OUTPUT _SKIP_;    STRING_PARAMETER ipAddress[256];
+DIGITAL_INPUT _SKIP_;      DIGITAL_OUTPUT _SKIP_;    INTEGER_PARAMETER portNumber;
+
+DIGITAL_INPUT enable;      DIGITAL_OUTPUT connected;
+
+ANALOG_INPUT _SKIP_;      ANALOG_OUTPUT  connectionStatus;
+ANALOG_INPUT _SKIP_;      ANALOG_OUTPUT errorStatus;
+
+ <#
+ foreach (String name in this.crestronConnection.DigitalProperties)
+ {
+ #>
+     DIGITAL_INPUT <#= name #>_FB;
+	 DIGITAL_OUTPUT <#= name #>;
+ <#
+ }
+ #>
+ 
+ <#
+ foreach (String name in this.crestronConnection.AnalogProperties)
+ {
+ #>
+     ANALOG_INPUT <#= name #>_FB;
+	 ANALOG_OUTPUT <#= name #>;
+ <#
+ }
+ #>
+ 
+ <#
+ foreach (String name in this.crestronConnection.StringProperties)
+ {
+ #>
+     STRING_INPUT <#= name #>_FB[256];
+	 STRING_OUTPUT <#= name #>;
+ <#
+ }
+ #>
+
+TCP_SERVER tcpServer[1024];
+
+PUSH enable
+{
+
+    SIGNED_INTEGER iStatus;
+                    
+    iStatus = SocketServerStartListen(tcpServer, ipAddress, portNumber);
+ 
+    SWITCH (iStatus)
+        {
+	    CASE (-1):
+            errorStatus = ERROR_BAD_TCP_SERVER;
+
+        CASE (-5):
+            errorStatus = ERROR_BAD_PORT;
+
+        DEFAULT:
+            errorStatus = ERROR_NONE;
+        }
+}
+
+RELEASE enable
+{
+
+    SIGNED_INTEGER iStatus;
+
+    iStatus = SocketServerStopListen(tcpServer);
+
+    SWITCH (iStatus)
+        {
+	    CASE (-1):
+            errorStatus = ERROR_BAD_TCP_SERVER;
+
+        CASE (-5):
+            errorStatus = ERROR_BAD_PORT;
+
+        DEFAULT:
+            errorStatus = ERROR_NONE;
+        }
+}
+
+SOCKETCONNECT tcpServer
+{
+    connected = 1;
+    connectionStatus = STATUS_CONNECTED;
+
+    // Print("OnConnect: input buffer size is: %d\n", Len(tcpServer.SocketRxBuf));
+
+    SocketSend(tcpServer, "connected");
+
+}
+
+SOCKETDISCONNECT tcpServer
+{
+    connected = 0;
+
+    if (enable)
+        connectionStatus = STATUS_REMOTE_DISCONNECT;
+    Else
+        connectionStatus = STATUS_NOT_CONNECTED;
+}
+
+SOCKETSTATUS tcpServer
+{
+    SIGNED_INTEGER iStatus;
+
+    iStatus = SocketGetStatus();
+
+    connectionStatus = iStatus;
+}
+
+SOCKETRECEIVE tcpServer
+{
+    STRING rx[1024];
+	INTEGER bytes;
+
+	bytes = len(tcpServer.SocketRxBuf);
+
+	while (bytes > 0)
+	{
+	    rx = Gather("\n", tcpServer.SocketRxBuf);
+
+		if (len(rx) > 0)
+		    ProcessLine(rx);
+
+        bytes = len(tcpServer.SocketRxBuf);
+	}
+}
+
+FUNCTION Send(STRING s)
+{
+   signed_integer iStatus;
+
+    iStatus = SocketSend(tcpServer, s );
+    
+    SWITCH (iStatus)
+        {
+        CASE (-1):
+            errorStatus = ERROR_BAD_TCP_SERVER;
+
+        CASE (-5):
+            errorStatus = ERROR_TX_NOT_CONNECTED;
+
+        DEFAULT:
+            errorStatus = ERROR_NONE;
+        }
+}
+
+FUNCTION SendInteger(STRING name, INTEGER value)
+{
+    STRING s[255];
+
+    MakeString(s, "%s=%d\n", name, value);
+    Send(s);
+}
+
+FUNCTION SendString(STRING name, STRING value)
+{
+    STRING s[255];
+
+    MakeString(s, "%s=%s\n", "Uint1", value);
+    Send(s);
+}
+
+<#
+foreach (String name in crestronConnection.DigitalProperties)
+{
+#>
+CHANGE <#= name #>_FB
+{
+    SendInteger("<#= name #>", <#= name #>_FB);
+}
+<#
+}
+#>
+
+<#
+foreach (String name in crestronConnection.AnalogProperties)
+{
+#>
+CHANGE <#= name #>_FB
+{
+    SendInteger("<#= name #>", <#= name #>_FB);
+}
+<#
+}
+#>
+
+<#
+foreach (String name in crestronConnection.StringProperties)
+{
+#>
+CHANGE <#= name #>_FB
+{
+    SendString("<#= name #>", <#= name #>_FB);
+}
+<#
+}
+#>
+
+FUNCTION ProcessInput(STRING line)
+{
+}
+
