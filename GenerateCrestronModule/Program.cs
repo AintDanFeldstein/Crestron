@@ -59,6 +59,7 @@ namespace GenerateCrestronModule
     {
         static void Main(string[] args)
         {
+            String fileName = (args.Length > 1) ? args[1] : "MyHomeCrestron.usp";
             MyHomeCrestron myHomeCrestron = new MyHomeCrestron();
 
             myHomeCrestron.Bool1 = true;
@@ -66,7 +67,7 @@ namespace GenerateCrestronModule
             myHomeCrestron.UInt1 = 75;
             SimplPlusTemplate template = new SimplPlusTemplate(myHomeCrestron);
             String result = template.TransformText();
-            System.IO.File.WriteAllText("c:\\tmp\\foo.xxx", result);
+            System.IO.File.WriteAllText(fileName, result);
         }
     }
 }
